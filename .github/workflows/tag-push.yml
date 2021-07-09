@@ -1,8 +1,12 @@
 name: dev-build
+# "on":
+#   push:
+#     tags:
+#       - "*"
 "on":
   push:
-    tags:
-      - "*"
+    branches:
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,8 +19,10 @@ jobs:
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
       - name: Add TAG_NAME env property
         run: echo "TAG_NAME=`echo ${GITHUB_REF#refs/tags/}`" >> $GITHUB_ENV
+      - name: Add IMG_TAG env property
+        run: echo "IMG_TAG=`echo img:${GITHUB_RUN_ID}`" >> $GITHUB_ENV
       - name: Display the path
-        run: echo $PATH
+        run: echo $GITHUB_RUN_ID
         shell: bash
       - name: Build the Docker image
         run: docker build --tag img:${GITHUB_RUN_ID} --build-arg TAG_NAME=${TAG_NAME} --build-arg SHORT_SHA=${SHORT_SHA} --file Dockerfile .
@@ -27,7 +33,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: img:${GITHUB_RUN_ID}
+          image-ref: ${{ env.IMG_TAG }}
           format: "template"
           template: "@/contrib/sarif.tpl"
           output: "trivy-results.sarif"
