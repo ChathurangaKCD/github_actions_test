@@ -1,0 +1,11 @@
+FROM node:14.15.4-alpine3.12 as build-stage
+
+WORKDIR /app
+ARG TAG_NAME
+ARG SHORT_SHA
+ENV REACT_APP_TAG_NAME=$TAG_NAME
+ENV REACT_APP_SHORT_SHA=$SHORT_SHA
+RUN env > /app/.env
+RUN echo $TAG_NAME
+RUN echo $SHORT_SHA
+CMD ["cat", ".env" ]
