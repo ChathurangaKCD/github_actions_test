@@ -11,13 +11,15 @@ jobs:
       - name: Set Version
         id: event-version
         run: echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/heads/}-${{github.sha}}
-      - name: Add SHORT_SHA env property with commit short sha
+      - name: Add SHORT_SHA env property
         run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+      - name: Add TAG_NAME env property
+        run: echo "TAG_NAME=`echo ${GITHUB_REF#refs/tags/}`" >> $GITHUB_ENV
       - name: Display the path
         run: echo $PATH
         shell: bash
       - name: Build the Docker image
-        run: docker build --tag img:${GITHUB_RUN_ID} --build-arg TAG_NAME=${GITHUB_REF} --build-arg SHORT_SHA=${SHORT_SHA} --file Dockerfile .
+        run: docker build --tag img:${GITHUB_RUN_ID} --build-arg TAG_NAME=${TAG_NAME} --build-arg SHORT_SHA=${SHORT_SHA} --file Dockerfile .
       # - name: GCR Image Push
       #   run: docker push $SERVICE_NAME:${{steps.event-version.outputs.SOURCE_TAG }}
       - name: Run
